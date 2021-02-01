@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			@font-face {
+				font-family: Yellowtail;
+				src: url(./Yellowtail-Regular.ttf);
+			}
+			.message {
+				position: fixed;
+				left: 0;
+				top: 0;
+				color: rgb(0, 5, 54);
+				height: calc(100vh - 72px);
+				width: calc(100vw - 96px);;
+				opacity: .9;
+				background: linear-gradient(135deg, rgba(253,200,48,1) 0%, rgba(243,115,53,1) 46%); /* linear-gradient(135deg, rgba(32,1,34,1) 0%, rgba(111,0,0,1) 46%);*/
+				font-size: 77px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-family: 'Yellowtail';
+				padding: 36px 48px;
+			}
+			.message--initial {
+				display: none;
+			}
+			.message::after {
+				content: 'x';
+				display: block;
+				position: absolute;
+				top: 0;
+				right: 7%;
+			}
+		</style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@animxyz/core@0.4.0/dist/animxyz.min.css">
+
+	</head>
+	<body>
+		<div class="message message--initial" xyz="flip-up flip-left duration-15 small"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r124/three.min.js"></script>
+        <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+        <script src="./heart.js"></script>
+		
+	</body>
+</html>
