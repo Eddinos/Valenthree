@@ -3,9 +3,12 @@ function init () {
   const { vertices, trianglesIndexes } = useCoordinates()
   const { geo, heartMesh } = createHeartMesh(vertices, trianglesIndexes)
   addWireFrameToMesh(heartMesh, geo)
+  heartMesh.position.y = -5
   scene.add(heartMesh)
+  createRoom({ width: 70, height: 70, depth: 70 }, scene)
+
   const modal = document.querySelector('.message')
-  const { onMouseIntersection } = handleMouseIntersection(camera, scene, modal)
+  const { onMouseIntersection } = handleMouseIntersection(camera, scene, modal, heartMesh.uuid)
 
   const animate = function () {
     requestAnimationFrame( animate );    
@@ -14,35 +17,6 @@ function init () {
     heartMesh.rotation.y -= 0.005
     
     startAnim && beatingAnimation(heartMesh, () => openModal(modal))
-
-    // if (heartMesh.scale.x < 1.1 && startAnim && !scaleThreshold) {
-    //   heartMesh.scale.x += beatingIncrement
-    //   heartMesh.scale.y += beatingIncrement
-    //   heartMesh.scale.z += beatingIncrement
-    //   if (heartMesh.scale.x >= 1.1) scaleThreshold = true
-    // } else if (scaleThreshold) {
-    //   heartMesh.scale.x -= beatingIncrement
-    //   heartMesh.scale.y -= beatingIncrement
-    //   heartMesh.scale.z -= beatingIncrement
-    //   if (heartMesh.scale.x <= 1) {
-    //     scaleThreshold = startAnim = false
-    //     openModal(modal)
-    //   }
-    // } 
-
-    // if (heartMesh.scale.x < 1.1 && !scaleThreshold) {
-    //     heartMesh.scale.x += 0.001
-    //     heartMesh.scale.y += 0.001
-    //     heartMesh.scale.z += 0.001
-    //     if (heartMesh.scale.x >= 1.1) scaleThreshold = true
-    // } else if (scaleThreshold && heartMesh.scale.x > 1) {
-    //    heartMesh.scale.x -= 0.001
-    //    heartMesh.scale.y -= 0.001
-    //    heartMesh.scale.z -= 0.001
-    //   //  if (heartMesh.scale.x <= 1) scaleThreshold = false
-    // }
-  
-    
   };
 
   window.addEventListener( 'click', onMouseIntersection, false )
@@ -57,30 +31,35 @@ function init () {
 let startAnim = false
 let scaleThreshold = false
 
-const beatingIncrement = 0.002
+const beatingIncrement = 0.008
 
 
 function useScene () {
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100);
   camera.position.z = 30;
-  camera.position.y = 12;
+  camera.position.y = 0;
 
-  //camera.lookAt(0, 8, 0);
   var renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  var controls = new THREE.OrbitControls( camera, renderer.domElement );
+  controls = new THREE.OrbitControls( camera, renderer.domElement );
+  controls.minPolarAngle = Math.PI/3
+  controls.maxPolarAngle = 2*Math.PI/3
+  // controls.maxAzimuthAngle = Math.PI/3
+  // controls.minAzimuthAngle = -Math.PI/3
+  controls.minDistance = 20
+  controls.maxDistance = 34
   controls.target.set(0, 5, 0);
   controls.update();
 
   const color = 0xFFFFFF;
-  const intensity = 1;
+  const intensity = 0.75;
   const light = new THREE.DirectionalLight(color, intensity);
-  light.position.set(0, 3, 20);
-  const light2 = new THREE.DirectionalLight(color, intensity);
-  light2.position.set(0, 0, -20);
+  light.position.set(-15, -10, -30);
+  light2 = new THREE.PointLight(color, intensity);
+  light2.position.set(15, -10, 30);
   
   scene.add(light);
   scene.add(light2)
@@ -90,7 +69,7 @@ function useScene () {
     camera,
     renderer,
     controls,
-    light
+    // light
   }
 }
 
@@ -189,6 +168,69 @@ function createHeartMesh (coordinatesList, trianglesIndexes) {
   }
 }
 
+function createRoom ({ width, height, depth }, scene) {
+  const planeMaterial = new THREE.MeshPhongMaterial( {color: 0x241b61, side: THREE.DoubleSide} )
+  for (let i = 0; i < 6; i++) {
+    const geo = new THREE.PlaneGeometry( width, height, 2 )
+    const rotationAngle = {
+      axis: 'X',
+      radiant: '0'
+    }
+    const translation = {
+      x: 0,
+      y: 0,
+      z: 0
+    }
+    switch (i) {
+      case 0:
+        translation.z = -depth/2
+        break;
+      case 1:
+        rotationAngle.radiant = -Math.PI * 0.5
+        rotationAngle.axis = 'X'
+        translation.y = -height/2
+        break;
+      case 2:
+        rotationAngle.radiant = -Math.PI * 0.5
+        rotationAngle.axis = 'X'
+        translation.y = height/2
+        break;
+      case 3:
+        rotationAngle.radiant = -Math.PI * 0.5
+        rotationAngle.axis = 'Y'
+        translation.x = -width/2
+        break;
+      case 4:
+        rotationAngle.radiant = -Math.PI * 0.5
+        rotationAngle.axis = 'Y'
+        translation.x = width/2
+        break;
+      case 5:
+        translation.z = depth/2
+        break;
+      default:
+        break;
+    }
+    const plane = new THREE.Mesh(geo[`rotate${rotationAngle.axis}`](rotationAngle.radiant).translate(translation.x, translation.y, translation.z), planeMaterial)
+    scene.add(plane)
+  }
+
+  // const plane = new THREE.Mesh( planeGeometry.translate(0, 0, -25), planeMaterial )  
+  // scene.add(plane)
+  // pGeom2 = new THREE.PlaneGeometry( 50, 50, 8 )
+  // const plane2 = new THREE.Mesh( pGeom2.rotateX(-Math.PI * 0.5).translate(0, -25, 0), planeMaterial )
+  // scene.add(plane2)
+  // pGeom2 = new THREE.PlaneGeometry( 50, 50, 8 )
+  // const plane3 = new THREE.Mesh( pGeom2.rotateX(-Math.PI * 0.5).translate(0, 25, 0),planeMaterial )
+  // scene.add(plane3)
+  // pGeom2 = new THREE.PlaneGeometry( 50, 50, 8 )
+  // const plane4 = new THREE.Mesh( pGeom2.rotateY(-Math.PI * 0.5).translate(-25, 0, 0), planeMaterial )
+  // scene.add(plane4)
+  // pGeom2 = new THREE.PlaneGeometry( 50, 50, 8 )
+  // const plane5 = new THREE.Mesh( pGeom2.rotateY(-Math.PI * 0.5).translate(25, 0, 0), planeMaterial )
+  // scene.add(plane5)
+}
+
 function addWireFrameToMesh (mesh, geometry) {
   const wireframe = new THREE.WireframeGeometry( geometry );
   const lineMat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
@@ -197,14 +239,10 @@ function addWireFrameToMesh (mesh, geometry) {
   mesh.add(line)
 }
 
-function handleMouseIntersection (camera, scene, modal) {
+function handleMouseIntersection (camera, scene, modal, meshUuid) {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();  
   function onMouseIntersection( event ) {
-
-    // calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-
     const coordinatesObject = event.changedTouches ? event.changedTouches[0] : event
 
     mouse.x = ( coordinatesObject.clientX / window.innerWidth ) * 2 - 1;
@@ -216,17 +254,12 @@ function handleMouseIntersection (camera, scene, modal) {
     const modal = document.querySelector('.message')
     if ((event.target || event.targetTouches) === modal) return 
     if (intersects.length === 0) {
-      // modal.style.transform = 'scale(0)'
       closeModal(modal)
     }
 
-    for ( let i = 0; i < intersects.length; i ++ ) {
-
-      if (intersects[i].object.type === 'Mesh') {
-          // intersects[ i ].face.color.set( 0x00FF00 );
-          modal.innerHTML = messages[intersects[i].faceIndex%messages.length]
-          startAnim = true
-      }
+    if (intersects.length && intersects[0].object.uuid === meshUuid) {
+        modal.innerHTML = messages[intersects[0].faceIndex%messages.length]
+        startAnim = true
     }
 
   }
@@ -240,11 +273,11 @@ function handleMouseIntersection (camera, scene, modal) {
 }
 
 function beatingAnimation (mesh, callback) {
-  if (mesh.scale.x < 1.1 && startAnim && !scaleThreshold) {
+  if (mesh.scale.x < 1.4 && startAnim && !scaleThreshold) {
     mesh.scale.x += beatingIncrement
     mesh.scale.y += beatingIncrement
     mesh.scale.z += beatingIncrement
-    if (mesh.scale.x >= 1.1) scaleThreshold = true
+    if (mesh.scale.x >= 1.4) scaleThreshold = true
   } else if (scaleThreshold) {
     mesh.scale.x -= beatingIncrement
     mesh.scale.y -= beatingIncrement
@@ -291,7 +324,10 @@ const messages = [
   'Fessier de déesse',
   'Sensible et empathique',
   'Gentille et compréhensive',
-  'Douce et voluptueuse' //22
+  'Douce et voluptueuse', //22
+  'La plus choupinette',
+  'Les voisins me regardent avec jalousie par la fenêtre',
+  'Je réactive les notifications pour toi'
 ]
 
 init()
