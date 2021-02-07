@@ -12,6 +12,7 @@ function init () {
 
   const animate = function () {
     requestAnimationFrame( animate );    
+    controls.update()
         
     renderer.render( scene, camera );
     heartMesh.rotation.y -= 0.005
