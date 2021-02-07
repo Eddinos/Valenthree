@@ -44,14 +44,15 @@ function useScene () {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  controls = new THREE.OrbitControls( camera, renderer.domElement );
+  // controls = new THREE.OrbitControls( camera, renderer.domElement );
+  controls = new DeviceOrientationControls( camera );
   controls.minPolarAngle = Math.PI/3
   controls.maxPolarAngle = 2*Math.PI/3
   // controls.maxAzimuthAngle = Math.PI/3
   // controls.minAzimuthAngle = -Math.PI/3
   controls.minDistance = 20
   controls.maxDistance = 34
-  controls.target.set(0, 5, 0);
+  // controls.target.set(0, 5, 0);
   controls.update();
 
   const color = 0xFFFFFF;
@@ -327,7 +328,7 @@ const messages = [
   'Douce et voluptueuse', //22
   'La plus choupinette',
   'Les voisins me regardent avec jalousie par la fenêtre',
-  'Je réactive les notifications pour toi'
+  'Je réactive les notifications pour toi',
 ]
 
 init()
