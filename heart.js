@@ -1,5 +1,6 @@
-function init () {
-  const { scene, camera, renderer } = useScene()
+function init ({ deviceOrientationMode } = { deviceOrientationMode: false }) {
+  document.querySelector('.controlsOverlay').remove()
+  const { scene, camera, renderer } = useScene(deviceOrientationMode)
   const { vertices, trianglesIndexes } = useCoordinates()
   const { geo, heartMesh } = createHeartMesh(vertices, trianglesIndexes)
   addWireFrameToMesh(heartMesh, geo)
@@ -29,7 +30,7 @@ function init () {
   animate()
 }
 
-function useScene () {
+function useScene (deviceOrientationMode) {
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100);
   camera.position.z = 30;
@@ -335,22 +336,17 @@ const messages = [
 let startAnim = false
 let scaleThreshold = false
 
-let deviceOrientationMode = window.location.hash ? window.location.hash.includes('deviceOrientation') : false
 const beatingIncrement = 0.008
 
 document.querySelector('.controlsOverlay__orbit').onclick = () => {
-  document.querySelector('.controlsOverlay').remove()
-  init()
+  init({ deviceOrientationMode: false })
 }
 document.querySelector('.controlsOverlay__rotation').onclick = () => {
-  deviceOrientationMode = true
-  document.querySelector('.controlsOverlay').remove()
-  init()
+  init({ deviceOrientationMode: true })
 }
 
 if (window.location.hash) {
-  document.querySelector('.controlsOverlay').remove()
-  init()
+  init({ deviceOrientationMode: window.location.hash.includes('deviceOrientation')  })
 } else {
   document.querySelector('.controlsOverlay').style.display = 'flex'
 }
