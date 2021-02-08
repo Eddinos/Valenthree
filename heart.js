@@ -11,8 +11,8 @@ function init () {
   const { onMouseIntersection } = handleMouseIntersection(camera, scene, modal, heartMesh.uuid)
 
   const animate = function () {
-    requestAnimationFrame( animate );    
-    controls.update()
+    requestAnimationFrame( animate ); 
+    if (deviceOrientationMode) controls.update()
         
     renderer.render( scene, camera );
     heartMesh.rotation.y -= 0.005
@@ -29,12 +29,6 @@ function init () {
   animate()
 }
 
-let startAnim = false
-let scaleThreshold = false
-
-const beatingIncrement = 0.008
-
-
 function useScene () {
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100);
@@ -45,16 +39,21 @@ function useScene () {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // controls = new THREE.OrbitControls( camera, renderer.domElement );
-  controls = new DeviceOrientationControls( camera );
-  // controls.minPolarAngle = Math.PI/3
-  // controls.maxPolarAngle = 2*Math.PI/3
-  // // controls.maxAzimuthAngle = Math.PI/3
-  // // controls.minAzimuthAngle = -Math.PI/3
-  // controls.minDistance = 20
-  // controls.maxDistance = 34
-  // // controls.target.set(0, 5, 0);
-  // controls.update();
+  if (deviceOrientationMode) {
+    controls = new DeviceOrientationControls( camera );
+  } else {
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+  
+    controls.minPolarAngle = Math.PI/3
+    controls.maxPolarAngle = 2*Math.PI/3
+    // controls.maxAzimuthAngle = Math.PI/3
+    // controls.minAzimuthAngle = -Math.PI/3
+    controls.minDistance = 20
+    controls.maxDistance = 34
+    // controls.target.set(0, 5, 0);
+    controls.update();
+  }
+  
 
   const color = 0xFFFFFF;
   const intensity = 0.75;
@@ -332,4 +331,26 @@ const messages = [
   'Je réactive les notifications pour toi',
 ]
 
-init()
+
+let startAnim = false
+let scaleThreshold = false
+
+let deviceOrientationMode = window.location.hash ? window.location.hash.includes('deviceOrientation') : false
+const beatingIncrement = 0.008
+
+document.querySelector('.controlsOverlay__orbit').onclick = () => {
+  document.querySelector('.controlsOverlay').remove()
+  init()
+}
+document.querySelector('.controlsOverlay__rotation').onclick = () => {
+  deviceOrientationMode = true
+  document.querySelector('.controlsOverlay').remove()
+  init()
+}
+
+if (window.location.hash) {
+  document.querySelector('.controlsOverlay').remove()
+  init()
+} else {
+  document.querySelector('.controlsOverlay').style.display = 'flex'
+}
