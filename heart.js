@@ -276,9 +276,9 @@ function handleMouseIntersection (camera, scene, modal, meshUuid) {
 
 function beatingAnimation (mesh, callback) {
   if (mesh.scale.x < 1.4 && startAnim && !scaleThreshold) {
-    mesh.scale.x += beatingIncrement
-    mesh.scale.y += beatingIncrement
-    mesh.scale.z += beatingIncrement
+    mesh.scale.x += beatingIncrement * 2
+    mesh.scale.y += beatingIncrement * 2
+    mesh.scale.z += beatingIncrement * 2
     if (mesh.scale.x >= 1.4) scaleThreshold = true
   } else if (scaleThreshold) {
     mesh.scale.x -= beatingIncrement
@@ -330,6 +330,11 @@ const messages = [
   'La plus choupinette',
   'Les voisins me regardent avec jalousie par la fenêtre',
   'Je réactive les notifications pour toi',
+  'On est exposé au nord mais tu illumines l\'appart',
+  'Calins de télétravail > tout le reste',
+  'Toujours la plus drôle',
+  'Meilleure coéquipière de sport',
+  'Nos bubble teas sont les plus savoureux'
 ]
 
 
